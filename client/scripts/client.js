@@ -7,6 +7,7 @@ window.onload = async () => {
 
     const relayUrl = relayjson.url[Math.floor(Math.random() * relayjson.url.length)];
     const ws = new WebSocket(`ws://${relayUrl}:${relayjson.port}`);
+    // const ws = new WebSocket(`ws://${relayUrl}`);
     console.log("Connecting to relay at:", `ws://${relayUrl}:${relayjson.port}`);
 
     let recipientUID = "";

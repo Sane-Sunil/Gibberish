@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Gibberish</title>
+    <link rel="stylesheet" href="style/client.css">
+  </head>
+  <body>
+    <div>
+      <h3>1-to-1 Private Chat</h3>
+      <p>Your UID: <span id="myUID">[UID]</span></p>
+      <label for="recipientUID">Enter recipient UID to start chat:</label>
+      <input id="recipientUID" placeholder="Recipient UID">
+      <button id="start">Start Chat</button>
+      <div id="chat" class="chat-container"></div>
+      <input id="msg" placeholder="Type message">
+      <button id="send">Send</button>
+    </div>
+
+    <script src="scripts/client.js"></script>
+  </body>
+</html>

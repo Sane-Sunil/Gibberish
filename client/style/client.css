@@ -1,0 +1,161 @@
+/* Reset and basic styles */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f5f5;
+  margin: 0;
+  padding: 40px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+}
+
+/* Container for the whole chat */
+body > div {
+  background: white;
+  border-radius: 8px;
+  padding: 25px 30px;
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.1);
+  max-width: 380px;
+  width: 100%;
+}
+
+/* Title */
+h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-weight: 700;
+  font-size: 1.5em;
+  color: #333;
+  text-align: center;
+}
+
+/* UID section */
+#myUID {
+  font-weight: 700;
+  color: #007bff;
+}
+
+/* Label and input container for recipient UID and buttons */
+label {
+  font-size: 1em;
+  font-weight: 500;
+  margin-top: 15px;
+  display: block;
+  color: #333;
+}
+
+input#recipientUID,
+input#msg {
+  margin-top: 6px;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1.5px solid #ccc;
+  border-radius: 6px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.3s;
+}
+
+input#recipientUID:focus,
+input#msg:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+/* Buttons styling */
+button {
+  background-color: #5699e2;
+  border: none;
+  color: white;
+  font-weight: 600;
+  padding: 10px 18px;
+  margin-top: 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+  width: 100%;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Chat textarea */
+#chat {
+  font-family: monospace, monospace;
+  font-size: 14px;
+  line-height: 1.4;
+  background-color: #fafafa;
+  color: #333;
+  border: 1.5px solid #ccc;
+  border-radius: 8px;
+  padding: 12px;
+  resize: none;
+  height: 200px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+  white-space: pre-wrap; /* preserve line breaks */
+}
+
+.chat-container {
+  background-color: #fafafa;
+  border: 1.5px solid #ccc;
+  border-radius: 8px;
+  padding: 12px;
+  height: 200px;
+  width: 100%;
+  overflow-y: auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 14px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Your messages (sent) */
+.message.sent {
+  align-self: flex-end;
+  background-color: #6184a9;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 20px 20px 0 20px;
+  max-width: 70%;
+  box-shadow: 0 2px 8px rgba(0,123,255,0.3);
+}
+
+/* Received messages */
+.message.received {
+  align-self: flex-start;
+  background-color: #e5e5ea;
+  color: #333;
+  padding: 10px 16px;
+  border-radius: 20px 20px 20px 0;
+  max-width: 70%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Relay / system messages */
+.message.system {
+  align-self: center;
+  font-size: 12px;
+  color: #666;
+  font-style: italic;
+  padding: 4px 8px;
+  max-width: 60%;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 4px;
+}
+
+
+
+/* Stack the message input and send button nicely */
+#msg {
+  margin-top: 10px;
+}
+
+/* Make sure everything stacks vertically */

@@ -2,20 +2,40 @@
 <html>
   <head>
     <title>Gibberish</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style/client.css">
   </head>
   <body>
-    <div>
-      <h3>1-to-1 Private Chat</h3>
-      <p>Your UID: <span id="myUID">[UID]</span></p>
+    <!-- <div id="info">
+      <p>Share the the uid with some one you want to chat or get someone's uid and start chat
+        <br><br> Once both keys are shared by server chat starts <br><br>
+        Refresh to change uid and chat
+      </p>
+    </div> -->
+     <div id="chat-main">
+       <button id="info-btn">?</button>
+       <h3>1-to-1 Private Chat</h3>
+       <p>Your UID: <span id="myUID">[UID]</span></p>
+       <label><input type="checkbox" id="persistUID">Static UID</label>
       <label for="recipientUID">Enter recipient UID to start chat:</label>
       <input id="recipientUID" placeholder="Recipient UID">
       <button id="start">Start Chat</button>
       <div id="chat" class="chat-container"></div>
-      <input id="msg" placeholder="Type message">
+       <textarea id="msg" placeholder="Type message" rows="1"></textarea>
       <button id="send">Send</button>
     </div>
 
-    <script src="scripts/client.js"></script>
-  </body>
-</html>
+     <div id="info-modal" class="modal">
+       <div class="modal-content">
+         <span class="close">&times;</span>
+         <p><br>Start using the app if the relay is connected 
+          <br><br>Share the uid with someone you want to chat or get someone's uid and start chat
+          <br><br>Once public keys are sent and received session starts
+          <br><br>Refresh to change uid and chat 
+          <br><br>Use static uid if you don't want uid to change</p>
+       </div>
+     </div>
+
+     <script src="scripts/client.js"></script>
+   </body>
+ </html>

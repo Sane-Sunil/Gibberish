@@ -69,7 +69,7 @@ window.onload = async () => {
     // Register UID with relay
     ws.onopen = () => {
     ws.send(JSON.stringify({ sessionId, register: true }));
-    appendChat(`Connected to relay.`, "system");
+    appendChat(`Connected with server.`, "system");
     };
 
     // Handle incoming messages
@@ -93,14 +93,16 @@ window.onload = async () => {
                 "spki", rawKey, { name:"RSA-OAEP", hash:"SHA-256" }, true, ["encrypt"]
             );
             recipientUID = data.from;  // <-- This line added to set recipientUID automatically
-            appendChat(`Received public key from ${data.from}`, "system");
+            // appendChat(`Received public key from ${data.from}`, "system");
+            appendChat(`Your friend is connected. Start chat`, "system");
 
             if(!sentOwnPubKeyBack) {
                 sentOwnPubKeyBack = true;
                 const exported = await crypto.subtle.exportKey("spki", keyPair.publicKey);
                 const payload = btoa(String.fromCharCode(...new Uint8Array(exported)));
                 ws.send(JSON.stringify({ from: sessionId, to: data.from, type:"pubkey", payload }));
-                appendChat(`Sent public key back to ${data.from}`, "system");
+                // appendChat(`Sent public key back to ${data.from}`, "system");
+                appendChat(`Your're connected.`, "system");
             }
             return;
         }
@@ -127,13 +129,14 @@ window.onload = async () => {
     const exported = await crypto.subtle.exportKey("spki", keyPair.publicKey);
     const payload = btoa(String.fromCharCode(...new Uint8Array(exported)));
     ws.send(JSON.stringify({ from: sessionId, to: recipientUID, type:"pubkey", payload }));
-    appendChat(`Chat started with ${recipientUID}. Sent public key.`, "system");
+    // appendChat(`Chat started with ${recipientUID}. Sent public key.`, "system");
+    appendChat(`You're ok`, "system");
     sentOwnPubKeyBack = true;
     };
 
     // Send message
     document.getElementById('send').onclick = async () => {
-    if(!recipientUID) return alert("Start chat first");
+    if(!recipientUID) return alert("Start chat first. Check info");
     if(!peerPublicKey) return alert("Waiting for peer's public key");
     if(ws.readyState !== WebSocket.OPEN) return alert("Connection lost. Please refresh.");
 

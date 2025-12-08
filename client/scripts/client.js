@@ -1,4 +1,7 @@
 window.onload = async () => {
+    // Initialize connection status
+    updateConnectionStatus('connecting');
+
     // Fetch relay JSON
     const relayjson = await fetch('./json/relays.json').then(r => r.json());
 
@@ -28,23 +31,83 @@ window.onload = async () => {
     });
 
     // Modal functionality
-    const modal = document.getElementById('info-modal');
+    const infoModal = document.getElementById('info-modal');
     const infoBtn = document.getElementById('info-btn');
-    const closeBtn = document.getElementsByClassName('close')[0];
+    const closeInfoBtn = document.getElementById('close-info-modal');
 
+    // Info modal
     infoBtn.onclick = function() {
-        modal.style.display = 'block';
+        infoModal.style.display = 'flex';
     }
 
-    closeBtn.onclick = function() {
-        modal.style.display = 'none';
+    closeInfoBtn.onclick = function() {
+        infoModal.style.display = 'none';
     }
 
+    // Close modals when clicking outside
     window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = 'none';
+        if (event.target == infoModal) {
+            infoModal.style.display = 'none';
         }
     }
+
+    // Dark mode functionality
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeIcon = document.querySelector('.theme-icon');
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+
+    themeToggle.onclick = function() {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateThemeIcon(newTheme);
+    }
+
+    function updateThemeIcon(theme) {
+        themeIcon.textContent = theme === 'light' ? '🌙' : '☀️';
+    }
+
+    // Copy UID functionality
+    const copyUidBtn = document.getElementById('copy-uid');
+    copyUidBtn.onclick = function() {
+        const uidElement = document.getElementById('myUID');
+        const uidText = uidElement.textContent;
+        
+        navigator.clipboard.writeText(uidText).then(() => {
+            // Show success feedback
+            copyUidBtn.classList.add('copied');
+            copyUidBtn.querySelector('.copy-icon').textContent = '✅';
+            
+            // Reset after 2 seconds
+            setTimeout(() => {
+                copyUidBtn.classList.remove('copied');
+                copyUidBtn.querySelector('.copy-icon').textContent = '📋';
+            }, 2000);
+        }).catch(err => {
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = uidText;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            
+            // Show success feedback
+            copyUidBtn.classList.add('copied');
+            copyUidBtn.querySelector('.copy-icon').textContent = '✅';
+            
+            setTimeout(() => {
+                copyUidBtn.classList.remove('copied');
+                copyUidBtn.querySelector('.copy-icon').textContent = '📋';
+            }, 2000);
+        });
+    };
 
     const relayUrl = relayjson.url[Math.floor(Math.random() * relayjson.url.length)];
     // const ws = new WebSocket(`wss://${relayUrl}:${relayjson.port}`);
@@ -70,6 +133,7 @@ window.onload = async () => {
     ws.onopen = () => {
     ws.send(JSON.stringify({ sessionId, register: true }));
     appendChat(`Connected with server.`, "system");
+    updateConnectionStatus('connected');
     };
 
     // Handle incoming messages
@@ -78,11 +142,14 @@ window.onload = async () => {
 
     if (data.type === "peer_disconnected") {
         if (recipientUID === data.peer) {
-        appendChat(`Peer ${data.peer} disconnected. Chat ended.`, "system");
+        appendChat(`❌ Peer disconnected. Chat session ended.`, "system");
         recipientUID = "";
         document.getElementById('recipientUID').value = "";
         peerPublicKey = null;
         sentOwnPubKeyBack = false;
+        const chatStatus = document.getElementById('chat-status');
+        chatStatus.textContent = 'Peer disconnected';
+        chatStatus.style.background = '#ef4444';
         }
         return;
     }
@@ -92,17 +159,15 @@ window.onload = async () => {
             peerPublicKey = await crypto.subtle.importKey(
                 "spki", rawKey, { name:"RSA-OAEP", hash:"SHA-256" }, true, ["encrypt"]
             );
-            recipientUID = data.from;  // <-- This line added to set recipientUID automatically
-            // appendChat(`Received public key from ${data.from}`, "system");
-            appendChat(`Your friend is connected. Start chat`, "system");
+            recipientUID = data.from;
+            appendChat(`🔗 Secure connection established with peer`, "system");
 
             if(!sentOwnPubKeyBack) {
                 sentOwnPubKeyBack = true;
                 const exported = await crypto.subtle.exportKey("spki", keyPair.publicKey);
                 const payload = btoa(String.fromCharCode(...new Uint8Array(exported)));
                 ws.send(JSON.stringify({ from: sessionId, to: data.from, type:"pubkey", payload }));
-                // appendChat(`Sent public key back to ${data.from}`, "system");
-                appendChat(`Your're connected.`, "system");
+                appendChat(`✅ Ready to send encrypted messages`, "system");
             }
             return;
         }
@@ -120,19 +185,21 @@ window.onload = async () => {
     }
     };
 
-    // Start chat
-    document.getElementById('start').onclick = async () => {
-    const uid = document.getElementById('recipientUID').value.trim();
-    if(!uid) return alert("Enter recipient UID to start chat");
-    recipientUID = uid;
-
-    const exported = await crypto.subtle.exportKey("spki", keyPair.publicKey);
-    const payload = btoa(String.fromCharCode(...new Uint8Array(exported)));
-    ws.send(JSON.stringify({ from: sessionId, to: recipientUID, type:"pubkey", payload }));
-    // appendChat(`Chat started with ${recipientUID}. Sent public key.`, "system");
-    appendChat(`You're ok`, "system");
-    sentOwnPubKeyBack = true;
+    // Clear chat functionality
+    document.getElementById('clear-chat').onclick = function() {
+        const chat = document.getElementById('chat');
+        chat.innerHTML = '';
+        const welcomeMessage = document.createElement('div');
+        welcomeMessage.className = 'welcome-message';
+        welcomeMessage.innerHTML = `
+            <div class="welcome-icon">👋</div>
+            <h3>Welcome back to Gibberish Chat</h3>
+            <p>Start a new conversation or continue your current chat.</p>
+        `;
+        chat.appendChild(welcomeMessage);
     };
+
+
 
     // Send message
     document.getElementById('send').onclick = async () => {
@@ -166,21 +233,66 @@ window.onload = async () => {
       }
     });
 
-    // Auto-resize textarea
+    // Keep textarea at fixed height with internal scrolling
     const msgTextarea = document.getElementById('msg');
-    msgTextarea.addEventListener('input', () => {
-      msgTextarea.style.height = 'auto';
-      msgTextarea.style.height = msgTextarea.scrollHeight + 'px';
-    });
+    // No auto-resize needed - textarea stays fixed height with internal scroll
+
+    // Update connection status
+    function updateConnectionStatus(status) {
+        const statusDot = document.getElementById('connection-status');
+        const statusText = document.querySelector('.status-text');
+        const chatStatus = document.getElementById('chat-status');
+
+        if (status === 'connected') {
+            statusDot.style.background = '#10b981'; // green
+            statusText.textContent = 'Connected';
+            chatStatus.textContent = 'Ready to chat';
+            chatStatus.style.background = '#10b981';
+        } else if (status === 'connecting') {
+            statusDot.style.background = '#f59e0b'; // yellow
+            statusText.textContent = 'Connecting...';
+            chatStatus.textContent = 'Connecting...';
+            chatStatus.style.background = '#f59e0b';
+        } else {
+            statusDot.style.background = '#ef4444'; // red
+            statusText.textContent = 'Disconnected';
+            chatStatus.textContent = 'Disconnected';
+            chatStatus.style.background = '#ef4444';
+        }
+    }
+
+    // Update chat status when starting chat
+    document.getElementById('start').onclick = async () => {
+        const uid = document.getElementById('recipientUID').value.trim();
+        if(!uid) return alert("Enter recipient UID to start chat");
+        recipientUID = uid;
+
+        const chatStatus = document.getElementById('chat-status');
+        chatStatus.textContent = 'Connecting to peer...';
+        chatStatus.style.background = '#f59e0b';
+
+        const exported = await crypto.subtle.exportKey("spki", keyPair.publicKey);
+        const payload = btoa(String.fromCharCode(...new Uint8Array(exported)));
+        ws.send(JSON.stringify({ from: sessionId, to: recipientUID, type:"pubkey", payload }));
+        appendChat(`Chat started with ${recipientUID}.`, "system");
+        sentOwnPubKeyBack = true;
+    };
 
     // Append messages to chat div
     function appendChat(text, type = "system") {
-    const chat = document.getElementById('chat');
-    const msgDiv = document.createElement('div');
-    msgDiv.classList.add('message', type);
-    msgDiv.innerHTML = text.replace(/\n/g, '<br>');
-    chat.appendChild(msgDiv);
-    chat.scrollTop = chat.scrollHeight;
+        const chat = document.getElementById('chat');
+        const msgDiv = document.createElement('div');
+        msgDiv.classList.add('message', type);
+        msgDiv.innerHTML = text.replace(/\n/g, '<br>');
+        chat.appendChild(msgDiv);
+        chat.scrollTop = chat.scrollHeight;
+
+        // Update chat status when receiving messages
+        if (type === 'received' || type === 'sent') {
+            const chatStatus = document.getElementById('chat-status');
+            chatStatus.textContent = 'Active chat';
+            chatStatus.style.background = '#10b981';
+        }
     }
 
 };

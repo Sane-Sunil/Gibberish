@@ -30,6 +30,31 @@ window.onload = async () => {
         }
     });
 
+    // Mobile menu functionality
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+    function toggleSidebar() {
+        sidebar.classList.toggle('active');
+        sidebarOverlay.classList.toggle('active');
+    }
+
+    function closeSidebar() {
+        sidebar.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+    }
+
+    mobileMenuToggle.onclick = toggleSidebar;
+    sidebarOverlay.onclick = closeSidebar;
+
+    // Close sidebar when clicking on chat area (mobile)
+    document.querySelector('.main-content').addEventListener('click', function(e) {
+        if (window.innerWidth <= 768 && sidebar.classList.contains('active')) {
+            closeSidebar();
+        }
+    });
+
     // Modal functionality
     const infoModal = document.getElementById('info-modal');
     const infoBtn = document.getElementById('info-btn');
@@ -38,6 +63,7 @@ window.onload = async () => {
     // Info modal
     infoBtn.onclick = function() {
         infoModal.style.display = 'flex';
+        closeSidebar(); // Close sidebar when opening modal on mobile
     }
 
     closeInfoBtn.onclick = function() {

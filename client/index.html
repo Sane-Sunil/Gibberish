@@ -10,6 +10,9 @@
     <header class="app-header">
       <div class="header-content">
         <div class="brand">
+          <button id="mobile-menu-toggle" class="mobile-menu-toggle">
+            <span class="menu-icon">☰</span>
+          </button>
           <div class="brand-icon">💬</div>
           <h1>Gibberish Chat</h1>
         </div>
@@ -26,8 +29,11 @@
 
     <!-- Main Layout -->
     <div class="app-layout">
+      <!-- Mobile Sidebar Overlay -->
+      <div id="sidebar-overlay" class="sidebar-overlay"></div>
+      
       <!-- Sidebar -->
-      <aside class="sidebar">
+      <aside id="sidebar" class="sidebar">
         <div class="sidebar-content">
           <div class="user-profile">
             <div class="avatar">

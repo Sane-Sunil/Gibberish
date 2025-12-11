@@ -6,8 +6,10 @@ window.onload = async () => {
     const relayjson = await fetch('./json/relays.json').then(r => r.json());
 
     const persistCheckbox = document.getElementById('persistUID');
+    const persistCheckboxMobile = document.getElementById('persistUID-mobile');
     const persistUID = localStorage.getItem('persistUID') === 'true';
     persistCheckbox.checked = persistUID;
+    if (persistCheckboxMobile) persistCheckboxMobile.checked = persistUID;
 
     let sessionId;
     if (persistUID && localStorage.getItem('savedUID')) {
@@ -19,41 +21,34 @@ window.onload = async () => {
         }
     }
     document.getElementById('myUID').innerText = sessionId;
+    document.getElementById('myUID-mobile').innerText = sessionId;
 
-    persistCheckbox.addEventListener('change', () => {
-        const isChecked = persistCheckbox.checked;
+    function handlePersistChange(isChecked) {
         localStorage.setItem('persistUID', isChecked);
+        persistCheckbox.checked = isChecked;
+        if (persistCheckboxMobile) persistCheckboxMobile.checked = isChecked;
         if (isChecked) {
             localStorage.setItem('savedUID', sessionId);
         } else {
+            // Generate new random UID when switching to non-static
+            sessionId = Math.random().toString(36).slice(2,10);
             localStorage.removeItem('savedUID');
+            document.getElementById('myUID').innerText = sessionId;
+            document.getElementById('myUID-mobile').innerText = sessionId;
         }
-    });
-
-    // Mobile menu functionality
-    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
-    const sidebar = document.getElementById('sidebar');
-    const sidebarOverlay = document.getElementById('sidebar-overlay');
-
-    function toggleSidebar() {
-        sidebar.classList.toggle('active');
-        sidebarOverlay.classList.toggle('active');
     }
 
-    function closeSidebar() {
-        sidebar.classList.remove('active');
-        sidebarOverlay.classList.remove('active');
+    persistCheckbox.addEventListener('change', () => {
+        handlePersistChange(persistCheckbox.checked);
+    });
+
+    if (persistCheckboxMobile) {
+        persistCheckboxMobile.addEventListener('change', () => {
+            handlePersistChange(persistCheckboxMobile.checked);
+        });
     }
 
-    mobileMenuToggle.onclick = toggleSidebar;
-    sidebarOverlay.onclick = closeSidebar;
-
-    // Close sidebar when clicking on chat area (mobile)
-    document.querySelector('.main-content').addEventListener('click', function(e) {
-        if (window.innerWidth <= 768 && sidebar.classList.contains('active')) {
-            closeSidebar();
-        }
-    });
+    // Mobile menu functionality removed - sidebar hidden on small devices
 
     // Modal functionality
     const infoModal = document.getElementById('info-modal');
@@ -104,12 +99,12 @@ window.onload = async () => {
     copyUidBtn.onclick = function() {
         const uidElement = document.getElementById('myUID');
         const uidText = uidElement.textContent;
-        
+
         navigator.clipboard.writeText(uidText).then(() => {
             // Show success feedback
             copyUidBtn.classList.add('copied');
             copyUidBtn.querySelector('.copy-icon').textContent = '✅';
-            
+
             // Reset after 2 seconds
             setTimeout(() => {
                 copyUidBtn.classList.remove('copied');
@@ -123,14 +118,50 @@ window.onload = async () => {
             textArea.select();
             document.execCommand('copy');
             document.body.removeChild(textArea);
-            
+
             // Show success feedback
             copyUidBtn.classList.add('copied');
             copyUidBtn.querySelector('.copy-icon').textContent = '✅';
-            
+
             setTimeout(() => {
                 copyUidBtn.classList.remove('copied');
                 copyUidBtn.querySelector('.copy-icon').textContent = '📋';
+            }, 2000);
+        });
+    };
+
+    // Mobile copy UID functionality
+    const copyUidBtnMobile = document.getElementById('copy-uid-mobile');
+    copyUidBtnMobile.onclick = function() {
+        const uidElement = document.getElementById('myUID-mobile');
+        const uidText = uidElement.textContent;
+
+        navigator.clipboard.writeText(uidText).then(() => {
+            // Show success feedback
+            copyUidBtnMobile.classList.add('copied');
+            copyUidBtnMobile.querySelector('.copy-icon').textContent = '✅';
+
+            // Reset after 2 seconds
+            setTimeout(() => {
+                copyUidBtnMobile.classList.remove('copied');
+                copyUidBtnMobile.querySelector('.copy-icon').textContent = '📋';
+            }, 2000);
+        }).catch(err => {
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = uidText;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+
+            // Show success feedback
+            copyUidBtnMobile.classList.add('copied');
+            copyUidBtnMobile.querySelector('.copy-icon').textContent = '✅';
+
+            setTimeout(() => {
+                copyUidBtnMobile.classList.remove('copied');
+                copyUidBtnMobile.querySelector('.copy-icon').textContent = '📋';
             }, 2000);
         });
     };
@@ -302,6 +333,37 @@ window.onload = async () => {
         ws.send(JSON.stringify({ from: sessionId, to: recipientUID, type:"pubkey", payload }));
         appendChat(`Chat started with ${recipientUID}.`, "system");
         sentOwnPubKeyBack = true;
+
+        // Scroll to chat area and end of messages
+        document.querySelector('.chat-area').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const chat = document.getElementById('chat');
+        chat.scrollTo({ top: chat.scrollHeight, behavior: 'smooth' });
+        // Also scroll body to end
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    };
+
+    // Mobile start chat functionality
+    document.getElementById('start-mobile').onclick = async () => {
+        const uid = document.getElementById('recipientUID-mobile').value.trim();
+        if(!uid) return alert("Enter recipient UID to start chat");
+        recipientUID = uid;
+
+        const chatStatus = document.getElementById('chat-status');
+        chatStatus.textContent = 'Connecting to peer...';
+        chatStatus.style.background = '#f59e0b';
+
+        const exported = await crypto.subtle.exportKey("spki", keyPair.publicKey);
+        const payload = btoa(String.fromCharCode(...new Uint8Array(exported)));
+        ws.send(JSON.stringify({ from: sessionId, to: recipientUID, type:"pubkey", payload }));
+        appendChat(`Chat started with ${recipientUID}.`, "system");
+        sentOwnPubKeyBack = true;
+
+        // Scroll to chat area and end of messages
+        document.querySelector('.chat-area').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const chat = document.getElementById('chat');
+        chat.scrollTo({ top: chat.scrollHeight, behavior: 'smooth' });
+        // Also scroll body to end
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     };
 
     // Append messages to chat div
@@ -311,7 +373,9 @@ window.onload = async () => {
         msgDiv.classList.add('message', type);
         msgDiv.innerHTML = text.replace(/\n/g, '<br>');
         chat.appendChild(msgDiv);
-        chat.scrollTop = chat.scrollHeight;
+        chat.scrollTo({ top: chat.scrollHeight, behavior: 'smooth' });
+        // Also scroll body to end
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 
         // Update chat status when receiving messages
         if (type === 'received' || type === 'sent') {

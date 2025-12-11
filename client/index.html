@@ -9,13 +9,10 @@
     <!-- Header -->
     <header class="app-header">
       <div class="header-content">
-        <div class="brand">
-          <button id="mobile-menu-toggle" class="mobile-menu-toggle">
-            <span class="menu-icon">☰</span>
-          </button>
-          <div class="brand-icon">💬</div>
-          <h1>Gibberish Chat</h1>
-        </div>
+         <div class="brand">
+           <div class="brand-icon">💬</div>
+           <h1>Gibberish Chat</h1>
+         </div>
         <div class="header-actions">
           <button id="theme-toggle" class="header-btn">
             <span class="theme-icon">🌙</span>
@@ -87,13 +84,40 @@
 
       <!-- Main Chat Area -->
       <main class="main-content">
-        <div class="chat-header">
-          <div class="chat-info">
-            <h2>Private Chat</h2>
-            <div class="chat-status">
-              <span class="status-badge" id="chat-status">Waiting to connect</span>
-            </div>
-          </div>
+         <div class="chat-header">
+           <div class="chat-info">
+             <h2>Private Chat</h2>
+             <div class="chat-status">
+               <span class="status-badge" id="chat-status">Waiting to connect</span>
+             </div>
+             <div class="mobile-chat-controls">
+              <div class="mobile-uid-set">
+                <div class="mobile-uid-display">
+                  <span class="uid-label">UID:</span>
+                  <div class="uid-wrapper">
+                    <span id="myUID-mobile" class="uid-value">[UID]</span>
+                    <button id="copy-uid-mobile" class="copy-btn" title="Copy UID">
+                      <span class="copy-icon">📋</span>
+                    </button>
+                  </div>
+                </div>
+                <label class="toggle-label mobile-toggle">
+                  <input type="checkbox" id="persistUID-mobile">
+                  <span class="toggle-slider"></span>
+                  <span class="toggle-text">Static UID</span>
+                </label>
+              </div>
+               
+               <div class="mobile-start-chat">
+                 <input id="recipientUID-mobile" type="text" placeholder="Enter recipient UID">
+                 <button id="start-mobile" class="primary-btn">
+                   <span class="btn-icon">🚀</span>
+                   Start Chat
+                 </button>
+               </div>
+             </div>
+           </div>
+           <br>
           <div class="chat-actions">
             <button id="clear-chat" class="secondary-btn">
               <span class="btn-icon">🗑️</span>
